@@ -1,0 +1,61 @@
+config:
+    name: "create user testcases."
+    variables:
+      user_agent: 'iOS/10.3'
+      Content-Type: "application/x-www-form-urlencoded"
+    request:
+      host: http://sjb-servicetest.sijibao.com
+      headers:
+        Content-Type: application/json
+        User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36
+
+
+testSuit:
+  - test:
+      name: "司机宝登录"
+      request:
+        uri: /sjbAccount/router
+        method: POST
+        headers:
+          Content-Type: "application/x-www-form-urlencoded"
+        body:
+          account: 17100000002
+          password: qqqq3333
+          userType: 2
+          deviceNum: AND-c1d9579e9a7dff7c
+          deviceType: 4
+          force: true
+          method: account.login
+          appcode: 100004
+          format: json
+          v: 1.0
+        notSignsParams: "password"
+      extract:
+        - sessionID: body.sessionID
+        - Content-Type: header.Content-Type
+      validate:
+        - {"check": "status_code", "comparator": "eq", "expect": 200}
+  - test:
+      name: "司机宝登录2"
+      request:
+        url: /sjbAccount/router
+        method: POST
+        headers:
+          Content-Type: "application/x-www-form-urlencoded"
+        body:
+          account: 17100000002
+          password: qqqq3333
+          userType: 2
+          deviceNum: AND-c1d9579e9a7dff7c
+          deviceType: 4
+          force: true
+          method: account.login
+          appcode: 100004
+          format: json
+          v: 1.0
+        notSignsParams: "password"
+      extract:
+        - sessionID: body.sessionID
+        - Content-Type: header.Content-Type
+      validate:
+        - {"check": "status_code", "comparator": "eq", "expect": 200}

@@ -1,6 +1,6 @@
 package Http;
 
-import org.junit.rules.ErrorCollector;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 /***
@@ -10,27 +10,17 @@ import static org.hamcrest.Matchers.*;
 
 public class Assert {
 
-    private final ErrorCollector collector;
-
-    public Assert(ErrorCollector collector) {
-        this.collector = collector;
-
+    public  static void assertEqual(Object check,Object expect){
+        assertThat(check, equalTo(expect));
     }
 
-    public  void assertEqual(Object check,Object expect){
-        this.collector.checkThat(check, equalTo(expect));
+    public  static void assertLessthan(int check,int expect){
+        assertThat(check, lessThan(expect));
     }
 
-    public  void assertNoteuals(Object check,Object expect){
-        this.collector.checkThat(check,not(expect));
+    public  static void assertGreaterthan(int check,int expect){
+        assertThat(check, greaterThan(expect));
     }
 
-    public  void assertLessthan(int check,int expect){
-        this.collector.checkThat(check, lessThan(expect));
-    }
-
-    public  void assertGreaterthan(int check,int expect){
-        this.collector.checkThat(check, greaterThan(expect));
-    }
 
 }

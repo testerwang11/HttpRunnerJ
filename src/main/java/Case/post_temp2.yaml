@@ -1,0 +1,53 @@
+- info:
+    name: "司机宝登录"
+  given:
+    body:
+      account: 17100000002
+      password: qqqq3333
+      userType: 2
+      deviceNum: AND-c1d9579e9a7dff7c
+      deviceType: 4
+      force: true
+      appcode: 100004
+      method: account.login
+      format: json
+      v: 1.0
+    headers:
+      Content-Type: "application/x-www-form-urlencoded"
+    request: "post"
+    notSignsParams: "password"
+  when:
+    url: "http://sjb-servicetest.sijibao.com/sjbAccount/router"
+  then:
+    statusCode: 200
+    body:
+     - eq : ["uid", "17100000002"]
+  extract:
+     list:
+        - sessionID : body.sessionID
+        - Content-Type: header.Content-Type
+
+- info:
+    name: "企业查询货源"
+  given:
+    body:
+      closed: false
+      running: true
+      start: 0
+      limit: 10
+      session: $.sessionID
+      appcode: 100094
+      method: stock.query.group.publish
+      format: json
+      v: 1.0
+    headers:
+      Content-Type: "application/x-www-form-urlencoded"
+    request: "post"
+  when:
+    url: "http://sjb-servicetest.sijibao.com/sjbStockOrder/router"
+  then:
+    statusCode: 200
+    body:
+    - gt : ["runningStockCount", "0"]
+
+

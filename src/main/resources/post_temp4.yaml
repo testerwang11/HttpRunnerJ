@@ -1,0 +1,8 @@
+config:
+    name: "create user testcases."
+    variables:
+      user_agent: 'iOS/10.3'
+    request:
+      base_url: http://sjb-servicetest.sijibao.com
+      headers:
+        Content-Type: application/json

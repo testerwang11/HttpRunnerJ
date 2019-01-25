@@ -6,4 +6,5 @@ public class StepModel {
     public GivenModel given;
     public WhenModel when;
     public ThenModel then;
+    public ExtractModel extract;
 }

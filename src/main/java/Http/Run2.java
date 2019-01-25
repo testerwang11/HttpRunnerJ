@@ -1,11 +1,12 @@
-/*
 package Http;
 
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Request;
+import org.testng.TestListenerAdapter;
+import org.testng.TestNG;
 
 
-public class Run {
+public class Run2 {
 
     private static String FILEPATH;
     private static String REPORTPATH;
@@ -25,31 +26,30 @@ public class Run {
     }
 
 
-    */
-/**
+    /**
      * 源码运行
      * @throws Exception
-     *//*
-
+     */
     private static void debugRun(){
         String rootPath = System.getProperty("user.dir");
-        FILEPATH = rootPath + "/src/main/java/Case/post_temp2.yaml";
+        FILEPATH = rootPath + "/src/main/java/Case/post_temp3.yaml";
         REPORTPATH = rootPath + "/src/main/java/Report";
         System.setProperty("FILEPATH",FILEPATH);
         System.setProperty("REPORTPATH",REPORTPATH);
         System.out.println("debugRun");
-        new JUnitCore().run(Request.classes(Requests.class));
-
+        TestNG testNG = new TestNG();
+        TestListenerAdapter listener = new TestListenerAdapter();
+        testNG.addListener(listener);
+        testNG.setTestClasses(new Class[]{Requests2.class});
+        testNG.run();
     }
 
 
-    */
-/**
+    /**
      * 执行参数
      * @param args
      * @throws Exception
-     *//*
-
+     */
     private static void executeParameter(String[] args){
         int optSetting = 0;
         for (; optSetting < args.length; optSetting++) {
@@ -69,10 +69,9 @@ public class Run {
         }
         System.setProperty("FILEPATH",FILEPATH);
         System.setProperty("REPORTPATH",REPORTPATH);
-        new JUnitCore().run(Request.classes(Requests.class));
+        new JUnitCore().run(Request.classes(Requests2.class));
     }
 
 
 }
 
-*/

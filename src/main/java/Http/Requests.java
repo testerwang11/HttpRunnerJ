@@ -1,8 +1,10 @@
+/*
 package Http;
 
 import Model.StepModel;
 import Tools.ExtentUtils;
 import Tools.MyLogger;
+import Tools.SignUtil;
 import com.relevantcodes.extentreports.ExtentReports;
 import com.relevantcodes.extentreports.ExtentTest;
 import com.relevantcodes.extentreports.NetworkMode;
@@ -16,33 +18,35 @@ import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.specification.FilterableRequestSpecification;
 import io.restassured.specification.FilterableResponseSpecification;
-import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
-import org.hamcrest.Matchers;
 import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.Test;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.junit.BeforeClass;
-import java.io.PrintStream;
+
 import java.util.*;
 import java.io.File;
 import java.io.IOException;
+
 import io.restassured.RestAssured;
 import org.junit.rules.ErrorCollector;
 import io.restassured.response.Response;
+
 import static Tools.MyLogger.initLogger;
 import static io.restassured.RestAssured.filters;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.lessThan;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+
 import static Tools.DataUntils.timeDate;
 
 
@@ -56,24 +60,31 @@ public class Requests {
     public String checkKey;
     public String selectkey;
     public Object check;
+    public Object value;
     public Object exp;
     public String ContentTypeJson = "application/json";
     public String ContentTypeFrom = "application/x-www-form-urlencoded";
+
     public static RequestSpecBuilder rsb = new RequestSpecBuilder();
-    public static ResponseSpecBuilder rb= new ResponseSpecBuilder();
+    public static ResponseSpecBuilder rb = new ResponseSpecBuilder();
+
     public static ResponseSpecification rs;
-    public  static String  LEVEL = "ALL";
+
+    public static String LEVEL = "ALL";
     private static ExtentReports extent;
-    private static String reportPath = String.format( System.getProperty("REPORTPATH")
+    private static String reportPath = String.format(System.getProperty("REPORTPATH")
             + "/reports/report_%s.html", timeDate());
     public static MyLogger logger;
     public static ExtentTest extentTest;
     public static File[] files;
 
-    @Parameterized.Parameter
-    public  static String CASEPATH;
+    //全局变量
+    public static HashMap<String, Object> data = new HashMap<>();
 
-    public static List<String> getCaseFolder(String casefolder){
+    @Parameterized.Parameter
+    public static String CASEPATH;
+
+    public static List<String> getCaseFolder(String casefolder) {
         List<String> caselist = new ArrayList<String>();
         File file = new File(casefolder);
         if (file.exists()) {
@@ -92,30 +103,31 @@ public class Requests {
     }
 
 
-
     @Parameterized.Parameters
-    public static Collection prepareData()
-    {
+    public static Collection prepareData() {
         CASEPATH = System.getProperty("FILEPATH");
         List<String> caseFolder = getCaseFolder(CASEPATH);
-        Object[] objects = (Object[])caseFolder.toArray();
+        Object[] objects = (Object[]) caseFolder.toArray();
         // 测试数据
         return Arrays.asList(objects);// 将数组转换成集合返回
     }
 
     @Rule
-    public ExtentUtils eu = new ExtentUtils(extent,extentTest);
+    public ExtentUtils eu = new ExtentUtils(extent, extentTest);
 
-    /**
+    */
+/**
      * @param filePath
      * @return
      * @throws IOException
-     */
+     *//*
+
     public static List<StepModel> load(String filePath) throws IOException {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         List<StepModel> data = mapper.readValue(
                 new File(filePath),
-                new TypeReference<List<StepModel>>(){}
+                new TypeReference<List<StepModel>>() {
+                }
         );
         return data;
     }
@@ -125,22 +137,24 @@ public class Requests {
     public static void setup() throws IOException {
         extent = new ExtentReports(reportPath, true, NetworkMode.OFFLINE);
         extentTest = extent.startTest("接口测试", "-");
-        logger = new MyLogger(extent,extentTest);
+        logger = new MyLogger(extent, extentTest);
         logger.log_info("初始化全局参数");
         rb.expectResponseTime(lessThan(1000L));
         rs = rb.build();
         //PrintStream ps = new PrintStream(new File("run.log"));
         //RestAssured.filters(new RequestLoggingFilter(ps),new ResponseLoggingFilter(ps));
-        RestAssured.filters(new RequestLoggingFilter(),new ResponseLoggingFilter());
+        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
         initLogger().setLevel(Level.ALL);
         RestAssured.useRelaxedHTTPSValidation();
         responseFilters();
     }
 
-    /**
+    */
+/**
      * 响应拦截器
-     */
-    public static void responseFilters(){
+     *//*
+
+    public static void responseFilters() {
         filters((new Filter() {
                     public Response filter(FilterableRequestSpecification requestSpec,
                                            FilterableResponseSpecification responseSpec, FilterContext ctx) {
@@ -160,56 +174,108 @@ public class Requests {
     public void run() throws IOException {
         testcase = load(CASEPATH);
         logger.log_info("开始测试!");
-        for( StepModel step: testcase){
+        for (StepModel step : testcase) {
             logger.log_info("接口名称:" + step.info.name);
-            if(step.given.request.equals("get")) {
+            if (step.given.request.equals("get")) {
                 Map queryParam = (Map) step.given.queryParam;
+
                 Map headers = (Map) step.given.headers;
-                if (step.given.queryParam == null && step.given.headers == null){
+                if (step.given.queryParam == null && step.given.headers == null) {
                     response = (Response) given().when().get(step.when.url).then().extract();
-                }else if (step.given.queryParam == null){
+                } else if (step.given.queryParam == null) {
                     response = (Response) given().headers(headers).when().get(step.when.url).then().extract();
-                }else {
+                } else {
                     response = (Response) given().headers(headers).
                             params(queryParam).when().get(step.when.url).then().extract();
                 }
-            }else if (step.given.request.equals("post")){
-                Map body = (Map) step.given.body;
+            } else if (step.given.request.equals("post")) {
+                HashMap<String, Object> body = (HashMap<String, Object>) step.given.body;
+                //替换变量
+                body = replaceParam(body);
+                String key;
+                if (null != step.given.notSignsParams) {
+                    key = SignUtil.getSign2(body, Arrays.asList(step.given.notSignsParams.toString().split(",")), body.get("appcode").toString());
+                } else {
+                    key = SignUtil.getSign2(body, null, body.get("appcode").toString());
+                }
+                body.put("sign", key);
                 Map headers = (Map) step.given.headers;
                 String ContentType = (String) headers.get("Content-Type");
-                if (ContentType.equals(ContentTypeFrom)){
+                if (ContentType.equals(ContentTypeFrom)) {
                     response = (Response) given().headers(headers)
                             .formParams(body).when().post(step.when.url).then().extract();
-                } else if (ContentType.equals(ContentTypeJson)){
+                } else if (ContentType.equals(ContentTypeJson)) {
                     response = (Response) given().headers(headers)
                             .body(body).when().post(step.when.url).then().extract();
                 }
             }
-            getResponse(response,step);
+            getResponse(response, step);
+            extractResponse(response, step);
         }
     }
 
+    private HashMap<String, Object> replaceParam(HashMap<String, Object> body) {
+        Iterator<String> iterator = body.keySet().iterator();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
+            System.out.println(key);
+            String value = body.get(key).toString();
+            if (value.startsWith("$.")) {
+                logger.log_info("处理变量:" + value);
+                body.put(key, data.get("sessionID"));
 
-    private void getResponse(Response response, StepModel step){
-        org.junit.Assert.assertEquals(response.statusCode(),step.then.statusCode);
+            }
+        }
+        return body;
+    }
+
+    private void getResponse(Response response, StepModel step) {
+        org.junit.Assert.assertEquals(response.statusCode(), step.then.statusCode);
         logger.log_info("断言接口状态码成功!");
         List getBody = (List) step.then.body;
-        for (Object bd:getBody) {
+        for (Object bd : getBody) {
             JSONObject object = JSONObject.fromObject(bd);
             Iterator<String> sIterator = object.keys();
-            while(sIterator.hasNext()){
+            while (sIterator.hasNext()) {
                 selectkey = sIterator.next();
                 logger.log_info("断言类型:" + selectkey);
                 JSONArray aslist = object.getJSONArray(selectkey);
                 logger.log_info("断言数据列表:" + aslist);
-                checkKey = String.valueOf(aslist.get(0)) ;
-                exp =  aslist.get(1);
+                checkKey = String.valueOf(aslist.get(0));
+                exp = aslist.get(1);
                 check = response.getBody().jsonPath().getString(checkKey);
                 logger.log_info("响应解析的值:" + check);
-                selectAssert(selectkey,check,exp);
+                selectAssert(selectkey, check, exp);
             }
         }
+    }
 
+    private void extractResponse(Response response, StepModel step) {
+        org.junit.Assert.assertEquals(response.statusCode(), step.then.statusCode);
+        if (null != step.extract) {
+            logger.log_info("提取参数!");
+            JSONArray extractDatas = JSONArray.fromObject(step.extract.getList());
+            List<String> getExtract = (List) step.extract.getList();
+            System.out.println(getExtract.toString());
+
+            for (Object bd : getExtract) {
+                JSONObject object = JSONObject.fromObject(bd);
+                Iterator<String> sIterator = object.keys();
+                while (sIterator.hasNext()) {
+                    selectkey = sIterator.next();
+                    if (object.getString(selectkey).startsWith("body")) {
+                        value = response.getBody().jsonPath().getString(object.getString(selectkey).split("body.")[1]);
+                    } else if (object.getString(selectkey).startsWith("header")) {
+                        value = response.getHeader(object.getString(selectkey).split("header.")[1]);
+                    } else if (object.getString(selectkey).startsWith("cookies")) {
+                        value = response.getCookie(object.getString(selectkey).split("cookies.")[1]);
+                    }
+                    logger.log_info(String.format("变量%s提取值:%s", selectkey, value));
+                    data.put(selectkey, value);
+                }
+            }
+
+        }
     }
 
     @AfterClass
@@ -217,15 +283,16 @@ public class Requests {
     }
 
 
-
-
-    /**
+    */
+/**
      * 选择不同类型的断言方法
+     *
      * @param key
      * @param check
      * @param expect
-     */
-    public void selectAssert(String key,Object check,Object expect) {
+     *//*
+
+    public void selectAssert(String key, Object check, Object expect) {
         logger.log_info("实际值:" + check);
         logger.log_info("预期值:" + expect);
         Assert as = new Assert(collector);
@@ -233,7 +300,12 @@ public class Requests {
             as.assertEqual(check, expect);
         } else if (key.equals("nq")) {
             as.assertNoteuals(check, expect);
+        } else if (key.equals("gt")) {
+            as.assertGreaterthan(Integer.valueOf(check.toString()), Integer.valueOf(expect.toString()));
+        } else if (key.equals("lt")) {
+            as.assertLessthan(Integer.valueOf(check.toString()), Integer.valueOf(expect.toString()));
         }
     }
 
 }
+*/

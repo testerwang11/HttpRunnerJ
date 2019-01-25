@@ -6,5 +6,5 @@ package Model;
  */
 
 public class InfoModel {
-    public  String name;
+    public String name;
 }
