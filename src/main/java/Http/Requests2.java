@@ -1,52 +1,38 @@
 package Http;
 
 import Model.AllModel;
+import Model.TestCaseModel;
 import Tools.ExtentUtils;
 import Tools.MyLogger;
 import Tools.SignUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.model.*;
 import com.relevantcodes.extentreports.ExtentReports;
 import com.relevantcodes.extentreports.ExtentTest;
 import com.relevantcodes.extentreports.NetworkMode;
-import io.restassured.RestAssured;
+import com.utils.ClientUitl;
+import com.utils.YamlUtils;
 import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.filter.Filter;
-import io.restassured.filter.FilterContext;
-import io.restassured.filter.log.RequestLoggingFilter;
-import io.restassured.filter.log.ResponseLoggingFilter;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import io.restassured.specification.FilterableRequestSpecification;
-import io.restassured.specification.FilterableResponseSpecification;
 import io.restassured.specification.ResponseSpecification;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
+import org.hamcrest.Matcher;
+import org.testng.ITestContext;
 import org.testng.annotations.*;
-import org.yaml.snakeyaml.Yaml;
-
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.*;
-
 import static Tools.DataUntils.timeDate;
 import static Tools.MyLogger.initLogger;
-import static io.restassured.RestAssured.filters;
-import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 
 
 public class Requests2 {
 
-    public static List<AllModel> testcase;
     public static Response response;
-    public String checkKey;
-    public String selectkey;
+
     public Object check;
     public Object value;
     public Object exp;
@@ -66,178 +52,100 @@ public class Requests2 {
     public static ExtentTest extentTest;
     public static File[] files;
 
-    public static JSONObject config;
-    public static JSONArray testCaseList;
-    public static String host;
-    public static JSONObject headers;
-
 
     //全局变量
     public static HashMap<String, Object> vars = new HashMap<>();
 
-    public static String CASEPATH;
+    //保存响应结果，传递后续使用
+    public static List<Response> response_list = new ArrayList<>();
 
-    public static List<String> getCaseFolder(String casefolder) {
-        List<String> caselist = new ArrayList<String>();
-        File file = new File(casefolder);
-        if (file.exists()) {
-            if (file.isDirectory()) {
-                files = file.listFiles();
-                for (int i = 0; i < files.length; i++) {
-                    caselist.add(String.valueOf(files[i]));
-                }
-            } else {
-                caselist.add(casefolder);
-            }
-        } else {
-            System.out.println(String.format("不存在文件夹:", casefolder));
-        }
-        return caselist;
-    }
-
-    public static Collection prepareData() {
-        CASEPATH = System.getProperty("FILEPATH");
-        List<String> caseFolder = getCaseFolder(CASEPATH);
-        Object[] objects = (Object[]) caseFolder.toArray();
-        logger.log_info("获取用例");
-
-        // 测试数据
-        return Arrays.asList(objects);// 将数组转换成集合返回
-    }
 
     public ExtentUtils eu = new ExtentUtils(extent, extentTest);
 
-    /**
-     * 加载测试数据
-     */
-    public static void loadAll(String file) throws FileNotFoundException {
-        Yaml yaml = new Yaml();
-        Map<String, Object> testData = (Map<String, Object>) yaml.load(new FileInputStream(new File(file)));
+    private static ConfigModel config;
 
-        config = JSONObject.fromObject(testData.get("config"));
-        testCaseList = JSONArray.fromObject(testData.get("testSuit"));
-    }
 
-    /**
-     * 添加config变量至全局变量
-     */
     private static void addGlobalVar() {
-        JSONObject variables = config.getJSONObject("variables");
-        Iterator<String> it = variables.keys();
-        while (it.hasNext()) {
-            String key = it.next();
-            String value = variables.getString(key);
-            vars.put(key, value);
-        }
-    }
+        HashMap<String, Object> vars = config.getVariables();
 
-    /**
-     * 处理Request全局数据
-     */
-    private static void addRequest() {
-        JSONObject request = config.getJSONObject("request");
-        request.getString("host");
-        headers = request.getJSONObject("headers");
     }
-
 
     @BeforeClass
     public static void setup() {
         extent = new ExtentReports(reportPath, true, NetworkMode.OFFLINE);
-        extentTest = extent.startTest("接口测试", "-");
         logger = new MyLogger(extent, extentTest);
         logger.log_info("初始化全局参数");
         rb.expectResponseTime(lessThan(1000L));
         rs = rb.build();
-
-        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
         initLogger().setLevel(Level.ALL);
-        RestAssured.useRelaxedHTTPSValidation();
-        responseFilters();
+
     }
 
     @BeforeSuite
-    public static void beforeTest() throws FileNotFoundException {
-        loadAll(CASEPATH);
-        addGlobalVar();
-        addRequest();
+    public static void beforeTest() {
+        //addGlobalVar();
+        //addRequest();
     }
 
-    /**
-     * 响应拦截器
-     */
-    public static void responseFilters() {
-        filters((new Filter() {
-                    public Response filter(FilterableRequestSpecification requestSpec,
-                                           FilterableResponseSpecification responseSpec, FilterContext ctx) {
-                        Response response = ctx.next(requestSpec, responseSpec);
-                        Response newResponse = new ResponseBuilder().clone(response)
-                                .setContentType(ContentType.JSON)
-                                .build();
-                        logger.log_info("开启响应拦截器");
-                        return newResponse;
-                    }
-                })
-        );
+    @BeforeMethod
+    public void beforeMethod(ITestContext context) {
+        extentTest = extent.startTest("接口测试", "-");
+
     }
 
 
     @DataProvider(name = "testCaseData")
-    public Iterator<Object[]> dataProvider() throws FileNotFoundException {
-        extent = new ExtentReports(reportPath, true, NetworkMode.OFFLINE);
-        extentTest = extent.startTest("接口测试", "-");
-        logger = new MyLogger(extent, extentTest);
+    public Iterator<Object> dataProvider() throws Exception {
+        List<Object> item = new ArrayList<Object>();
 
-        prepareData();
-        loadAll(CASEPATH);
-        return testCaseList();
+        //extent = new ExtentReports(reportPath, true, NetworkMode.OFFLINE);
+        //extentTest = extent.startTest("接口测试", "-");
+        //logger = new MyLogger(extent, extentTest);
+        TestDataModel testDataModel = YamlUtils.loadData();
+        config = testDataModel.getConfig();
+        Iterator it = testDataModel.getTestSuit().iterator();
+        while (it.hasNext()) {
+            TestCaseModel testCaseModel = (TestCaseModel) it.next();
+            item.add(testCaseModel.getTest());
+        }
+        return item.iterator();
     }
 
     @Test(dataProvider = "testCaseData")
-    public void run(JSONObject testCase) throws IOException {
-        logger.log_info("开始测试!");
-        String testName = testCase.getString("name");
-        String uri = testCase.getJSONObject("request").getString("uri");
-        String method = testCase.getJSONObject("request").getString("method");
-        JSONObject headers = testCase.getJSONObject("request").getJSONObject("headers");
-        JSONObject body = testCase.getJSONObject("request").getJSONObject("body");
-        String notSignsParams = testCase.getJSONObject("request").getString("notSignsParams");
-        JSONArray extract = testCase.getJSONArray("extract");
-        JSONArray validate = testCase.getJSONArray("validate");
+    public void run(DetailModel detailModel) {
 
-        logger.log_info("接口名称:" + testName);
-        logger.log_info("请求方式:" + method);
-        logger.log_info("请求uri:" + uri);
-        logger.log_info("Headers:" + headers);
-        logger.log_info("body:" + body);
-        logger.log_info("notSignsParams:" + notSignsParams);
+        //System.out.println("detailModel = [" + detailModel.getName() + "]");
 
-        ObjectMapper mapper = new ObjectMapper();
-        HashMap<String, Object> mHeaders = mapper.readValue(headers.toString(), HashMap.class);
-
-        HashMap<String, Object> mData = mapper.readValue(body.toString(), HashMap.class);
+        HashMap<String, Object> oData = detailModel.getRequest().getBody();
         //替换变量
-        mData = replaceParam(mData);
+        oData = replaceParam(oData);
+
         //签名
         String key;
-        if (!StringUtils.isEmpty("notSignsParams")) {
-            key = SignUtil.getSign2(mData, Arrays.asList(notSignsParams.split(",")), body.getString("appcode"));
+        if (!StringUtils.isEmpty(detailModel.getRequest().getNotSignsParams())) {
+            key = SignUtil.getSign2(oData, Arrays.asList(detailModel.getRequest().getNotSignsParams().split(",")), oData.get("appcode").toString());
         } else {
-            key = SignUtil.getSign2(mData, null, body.getString("appcode"));
+            key = SignUtil.getSign2(oData, null, oData.get("appcode").toString());
         }
-        mData.put("sign", key);
+        oData.put("sign", key);
 
-        if (method.equalsIgnoreCase("POST")) {
-            response = (Response) given().headers(mHeaders)
-                    .body(mData).when().post(uri).then().extract();
-        } else if (method.equalsIgnoreCase("GET")) {
-            response = (Response) given().headers(headers).
-                    params(mData).when().get(uri).then().extract();
+        if (detailModel.getRequest().getMethod().equalsIgnoreCase("POST")) {
+            response = ClientUitl.post(config.getRequest().getHost()+"/"+detailModel.getRequest().getUri(), detailModel.getRequest().getHeaders(), oData);
+        } else if (detailModel.getRequest().getMethod().equalsIgnoreCase("GET")) {
+            response =  ClientUitl.get(config.getRequest().getHost()+"/"+detailModel.getRequest().getUri(), detailModel.getRequest().getHeaders(), oData);
         }
-        validateResponse(response, validate);
-        extractResponse(response, extract);
+
+        response_list.add(response);
+
+        validateResponse(response, detailModel.getValidate());
+        extractResponse(response, detailModel.getExtract());
     }
 
+    /**
+     * 替换body中变量
+     * @param body
+     * @return
+     */
     private HashMap<String, Object> replaceParam(HashMap<String, Object> body) {
         Iterator<String> iterator = body.keySet().iterator();
         while (iterator.hasNext()) {
@@ -252,64 +160,63 @@ public class Requests2 {
         return body;
     }
 
-    private void validateResponse(Response response, JSONArray validate) {
-        Iterator vIt = validate.iterator();
-        while (vIt.hasNext()) {
-            JSONObject v = (JSONObject) vIt.next();
-            v.getString("check");
-            v.getString("comparator");
-            v.getOrDefault("expect", null);
-            logger.log_info("断言类型:" + v.getString("check"));
-
-            if (v.getString("check").equalsIgnoreCase("status_code")) {
-                selectAssert(v.getString("comparator"), response.statusCode(), v.getOrDefault("expect", null));
-            } else {
-                logger.log_info("响应解析的值:" + response.getBody().jsonPath().getString(v.getString("check")));
-                selectAssert(v.getString("comparator"), response.getBody().jsonPath().getString(v.getString("check")), v.getOrDefault("expect", null));
+    public void validateResponse(Response response, List<ValidateModel> validates) {
+        logger.log_info("断言!");
+        String checkKey;
+        for(ValidateModel validate:validates){
+            checkKey = validate.getCheck();
+            if(checkKey.equalsIgnoreCase("status_code")){
+                selectAssert(validate.getComparator(), response.getStatusCode(), validate.getExpect());
+            }else{
+                if(checkKey.startsWith("body")){
+                    //selectAssert(validate.getComparator(), response.getBody().jsonPath().getString(checkKey.substring(5, checkKey.length()-1)), validate.getExpect());
+                }else if(checkKey.startsWith("header")){
+                    //selectAssert(validate.getComparator(), response.header(checkKey.substring(5, checkKey.length()-1)), validate.getExpect());
+                }
             }
         }
     }
 
-    private void extractResponse(Response response, JSONArray extract) {
-        Iterator vIt = extract.iterator();
-        while (vIt.hasNext()) {
-            JSONObject v = (JSONObject) vIt.next();
-            Iterator<String> it = v.keys();
-            while (it.hasNext()) {
-                String key = it.next();
-                String value = v.getString(key);
-                if (value.startsWith("body")) {
-                    value = response.getBody().jsonPath().getString(value.split("body.")[1]);
-                } else if (value.startsWith("header")) {
-                    value = response.getHeader(value.split("header.")[1]);
-                } else if (value.startsWith("cookies")) {
-                    value = response.getCookie(value.split("cookies.")[1]);
+
+
+    private void extractResponse(Response response, List<ExtractModel> extracts) {
+        logger.log_info("提取变量");
+
+        String extractKey;
+        String vname;
+        for(ExtractModel extract:extracts){
+            vname = extract.getName();
+            extractKey = extract.getPath();
+            if(extractKey.equalsIgnoreCase("status_code")){
+                vars.put(vname, response.getStatusCode());
+            }else{
+                if(extractKey.startsWith("body")){
+                    vars.put(vname, response.getBody().jsonPath().getString(extractKey.substring(5)));
+                }else if(extractKey.startsWith("header")){
+                    vars.put(vname, response.header(extractKey.substring(7)));
                 }
-                logger.log_info(String.format("变量%s提取值:%s", key, value));
-                vars.put(key, value);
             }
         }
+        System.out.println(vars.size());
     }
 
     @AfterClass
-    public static void teardown() throws IOException {
+    public static void teardown() {
+        extent.close();
+        extent.flush();
     }
 
 
-    /**
-     * 选择不同类型的断言方法
-     *
-     * @param key
-     * @param check
-     * @param expect
-     */
+
+
     public void selectAssert(String key, Object check, Object expect) {
         logger.log_info("实际值:" + check);
         logger.log_info("预期值:" + expect);
         if (key.equals("eq")) {
             Assert.assertEqual(check, expect);
         } else if (key.equals("gt")) {
-            Assert.assertGreaterthan(Integer.valueOf(check.toString()), Integer.valueOf(expect.toString()));
+            //return assertThat(check, greaterThan(expect));
+
         } else if (key.equals("lt")) {
             Assert.assertLessthan(Integer.valueOf(check.toString()), Integer.valueOf(expect.toString()));
         }

@@ -1,8 +1,16 @@
 package Model;
 
-import java.util.List;
+import com.model.DetailModel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
+
+@Getter
+@Setter
+@ToString
 public class TestCaseModel {
 
-    private List<TestModel> testSuit;
+    private DetailModel test;
+
 }

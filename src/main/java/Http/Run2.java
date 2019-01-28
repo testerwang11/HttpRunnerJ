@@ -1,7 +1,6 @@
 package Http;
 
-import org.junit.runner.JUnitCore;
-import org.junit.runner.Request;
+
 import org.testng.TestListenerAdapter;
 import org.testng.TestNG;
 
@@ -30,6 +29,7 @@ public class Run2 {
      * 源码运行
      * @throws Exception
      */
+
     private static void debugRun(){
         String rootPath = System.getProperty("user.dir");
         FILEPATH = rootPath + "/src/main/java/Case/post_temp3.yaml";
@@ -45,11 +45,12 @@ public class Run2 {
     }
 
 
-    /**
+/**
      * 执行参数
      * @param args
      * @throws Exception
      */
+
     private static void executeParameter(String[] args){
         int optSetting = 0;
         for (; optSetting < args.length; optSetting++) {
@@ -69,9 +70,8 @@ public class Run2 {
         }
         System.setProperty("FILEPATH",FILEPATH);
         System.setProperty("REPORTPATH",REPORTPATH);
-        new JUnitCore().run(Request.classes(Requests2.class));
+        //new JUnitCore().run(Request.classes(Requests2.class));
     }
 
 
 }
-

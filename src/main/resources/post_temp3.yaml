@@ -31,31 +31,30 @@ testSuit:
           v: 1.0
         notSignsParams: "password"
       extract:
-        - sessionID: body.sessionID
-        - Content-Type: header.Content-Type
+        - {"name": "sessionID", "path": "body.sessionID"}
+        - {"name": "Content-Type", "path": "header.Content-Type"}
       validate:
         - {"check": "status_code", "comparator": "eq", "expect": 200}
+        - {"check": "status_code", "comparator": "eq", "expect": 200}
   - test:
-      name: "司机宝登录2"
+      name: "企业查询货源"
       request:
-        url: /sjbAccount/router
+        uri: /sjbStockOrder/router
         method: POST
         headers:
           Content-Type: "application/x-www-form-urlencoded"
         body:
-          account: 17100000002
-          password: qqqq3333
-          userType: 2
-          deviceNum: AND-c1d9579e9a7dff7c
-          deviceType: 4
-          force: true
-          method: account.login
-          appcode: 100004
+          closed: false
+          running: true
+          start: 0
+          limit: 10
+          session: $.sessionID
+          appcode: 100094
+          method: stock.query.group.publish
           format: json
           v: 1.0
-        notSignsParams: "password"
       extract:
-        - sessionID: body.sessionID
-        - Content-Type: header.Content-Type
+        - {"name": "Content-Type", "path": "header.Content-Type"}
       validate:
         - {"check": "status_code", "comparator": "eq", "expect": 200}
+        - {"check": "runningStockCount", "comparator": "gt", "expect": 1110}
