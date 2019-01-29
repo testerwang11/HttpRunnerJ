@@ -5,6 +5,9 @@
 target
 *.iml
 *.ipr
+test-output
+*.Report
+logs
 
 #Eclipse files
 *.settings
