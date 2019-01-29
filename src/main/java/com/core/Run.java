@@ -40,8 +40,8 @@ public class Run {
 
     private static void debugRun() {
         String rootPath = System.getProperty("user.dir");
-        //FILEPATH = rootPath + "/src/main/java/Case2/post_temp1.yaml";
-        FILEPATH = rootPath + "/src/main/java/Case2/";
+        FILEPATH = rootPath + "/src/main/java/Case2/post_temp1.yaml";
+        //FILEPATH = rootPath + "/src/main/java/Case2/";
 
         REPORTPATH = rootPath + "/src/main/java/Report";
         System.setProperty("FILEPATH", FILEPATH);

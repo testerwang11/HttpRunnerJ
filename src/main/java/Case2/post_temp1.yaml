@@ -18,7 +18,7 @@ testSuit:
         headers:
           Content-Type: "application/x-www-form-urlencoded"
         body:
-          account: 17100000002
+          account: ${random_phone()}
           password: qqqq3333
           userType: 2
           deviceNum: AND-c1d9579e9a7dff7c
@@ -35,25 +35,3 @@ testSuit:
       validate:
         - {"check": "status_code", "comparator": "eq", "expect": 200}
         - {"check": "status_code", "comparator": "eq", "expect": 200}
-  - test:
-      name: "企业查询货源"
-      request:
-        uri: /sjbStockOrder/router
-        method: POST
-        headers:
-          Content-Type: "application/x-www-form-urlencoded"
-        body:
-          closed: false
-          running: true
-          start: 0
-          limit: 10
-          session: $.sessionID
-          appcode: 100094
-          method: stock.query.group.publish
-          format: json
-          v: 1.0
-      extract:
-        - {"name": "Content-Type", "path": "header.Content-Type"}
-      validate:
-        - {"check": "status_code", "comparator": "eq", "expect": 200}
-        - {"check": "body.runningStockCount", "comparator": "gt", "expect": 110}

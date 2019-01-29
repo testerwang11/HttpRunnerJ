@@ -47,7 +47,7 @@ testSuit:
           running: true
           start: 0
           limit: 10
-          session: $.sessionID
+          session: ${sessionID}
           appcode: 100094
           method: stock.query.group.publish
           format: json

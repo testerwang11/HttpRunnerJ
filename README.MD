@@ -11,7 +11,6 @@ https://cn.httprunner.org/concept/testcase-structure/
 3.增加输入请求和响应日志
 ```
 
-
 # jar包使用
 ```$xslt
 把该工具打包成jar包,jar包在target目录下
@@ -24,46 +23,7 @@ java -jar HttpTools-1.0-SNAPSHOT.jar
 -v ALL 日志等级
 ```
 
-# 模版格式
-```$xslt
-get请求
 
-- info:
-    name: "查询快递"
-  given:
-    queryParam:
-      type: "shentong"
-      postid: "111111"
-    headers:
-      Accept: "*/*"
-    request: "get"
-  when:
-    url: "http://www.kuaidi100.com/query"
-  then:
-    statusCode: 200
-    body:
-    - eq : ["message", "ok"]
-```
-
-```$xslt
-post请求
-
-- info:
-    name: "电子书详情页"
-  given:
-    body:
-      bid: 3210
-      userInfo:
-        uid: "229461915"
-    headers:
-      Content-Type: "application/json"
-    request: "post"
-  when:
-    url: "https://m.igetget.com/hybrid/api/v1/ebook/detail"
-  then:
-    statusCode: 200
-    body:
-     - eq : ["errCode", "0"]
 ```
 
 # 断言
@@ -78,10 +38,3 @@ post请求
 # 响应解析
 使用jsonpath语法解析响应
 
-
-# 问题
-```
-io.restassured.path.json.exception.JsonPathException: Failed to parse the JSON document
-
-https://testerhome.com/topics/6672
-```

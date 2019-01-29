@@ -2,6 +2,7 @@ package com.core;
 
 import com.model.TestCaseModel;
 import com.utils.AssertUtil;
+import com.utils.FunctionUtil;
 import com.utils.SignUtil;
 import com.alibaba.fastjson.JSON;
 import com.model.*;
@@ -13,7 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.testng.Reporter;
 import org.testng.annotations.*;
 import org.testng.annotations.Optional;
+
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
@@ -36,6 +41,7 @@ public class Requests {
 
     private static ConfigModel config;
 
+    private static Pattern mat = Pattern.compile("(?<=\\（)(\\S+)(?=\\）)");
 
     private static void addGlobalVar() {
         vars = config.getVariables();
@@ -89,8 +95,6 @@ public class Requests {
         HashMap<String, Object> oData = detailModel.getRequest().getBody();
         //替换变量
         oData = replaceParam(oData);
-        //替换随机数
-
 
         //签名
         String key;
@@ -134,9 +138,27 @@ public class Requests {
         while (iterator.hasNext()) {
             String key = iterator.next();
             String value = body.get(key).toString();
-            if (value.startsWith("$.")) {
-                Reporter.log(String.format("替换变量%s为%s", value, vars.get(value.substring(2))));
-                body.put(key, vars.get(value.substring(2)));
+            String result = null;
+            if (value.startsWith("$")) {
+                String temp = value.substring(2, value.length() - 1);
+                //String args = mat.matcher(temp).group();
+
+                temp = temp.replace("(", "").replace(")", "");
+                System.out.println(temp);
+                if (!StringUtils.isEmpty(System.getProperty(temp))) {
+                    //判断是不是系统变量
+                    result = System.getProperty(temp);
+                } else if (FunctionUtil.isFunction(temp)) {
+                    //判断是不是随机变量
+                    String[] args2 = new String[0];
+                    result = FunctionUtil.getValue(temp, args2);
+                } else if (vars.containsKey(temp)) {
+                    result = vars.get(temp).toString();
+                } else {
+                    Reporter.log(String.format("没有找到变量:%s,请仔细检查", value));
+                }
+                body.put(key, result);
+                Reporter.log(String.format("替换变量%s为%s", value, result));
             }
         }
         return body;
@@ -175,7 +197,7 @@ public class Requests {
     private void extractResponse(Response response, List<ExtractModel> extracts) {
         String extractKey;
         String vname;
-        Object value="";
+        Object value = "";
         for (ExtractModel extract : extracts) {
             vname = extract.getName();
             extractKey = extract.getPath();

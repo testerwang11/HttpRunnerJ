@@ -236,6 +236,10 @@ public class RandomUtils {
         return curDate + "_" + hour + "_" + minute + "_" + second;
     }
 
+    public static String getIdCard() {
+        return IdCardUtils.generate();
+    }
+
     public static void main(String[] args) {
 
     }
