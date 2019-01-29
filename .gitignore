@@ -1,7 +1,7 @@
 .allure
 
 #IDEA Files
-.idea
+.idea/
 target
 *.iml
 *.ipr
@@ -9,6 +9,7 @@ test-output
 *.Report
 /logs
 *.xml
+/
 
 #Eclipse files
 *.settings
