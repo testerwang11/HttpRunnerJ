@@ -1,4 +1,4 @@
-package Tools;
+package com.utils;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;

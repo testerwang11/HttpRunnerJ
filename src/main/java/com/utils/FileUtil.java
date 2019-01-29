@@ -1,4 +1,4 @@
-package Tools;
+package com.utils;
 
 import com.google.gson.Gson;
 import org.yaml.snakeyaml.Yaml;
@@ -6,6 +6,8 @@ import java.io.*;
 import java.util.Calendar;
 import java.util.Map;
 
+import static com.utils.RandomUtils.getNewDate;
+import static com.utils.RandomUtils.getNow;
 
 
 /**
@@ -14,7 +16,7 @@ import java.util.Map;
  */
 
 
-public class FileUntils {
+public class FileUtil {
 
 
     /**
@@ -128,7 +130,7 @@ public class FileUntils {
 
     public static String getFileName(String basePath){
         removeFolder(basePath, -7);
-        String name = DataUntils.getNow("yyyyMMdd");
+        String name = getNow("yyyyMMdd");
         File file = new File(basePath + File.separator + name);
         if(! file.exists()){
             return file.getAbsolutePath();
@@ -153,7 +155,7 @@ public class FileUntils {
     }
 
     public static void removeFolder(String basePath, int day){
-        String endDate = DataUntils.getNewDate(day);
+        String endDate = getNewDate(day);
         File baseFile = new File(basePath);
         if(baseFile.exists()){
             for (File file : baseFile.listFiles()) {

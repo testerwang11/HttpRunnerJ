@@ -3,10 +3,7 @@ package com.model;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Getter
 @Setter
@@ -16,7 +13,7 @@ public class ConfigModel {
 
     private HashMap<String, Object> variables;
 
-    private RequestModel2 request;
+    private RequestModel request;
 
 
 }

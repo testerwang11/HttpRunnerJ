@@ -1,24 +1,22 @@
 package com.utils;
 
-import Model.TestCaseModel;
-import com.alibaba.fastjson.JSON;
-import com.model.ConfigModel;
-import com.model.DetailModel;
 import com.model.TestDataModel;
 import org.yaml.snakeyaml.Yaml;
-import java.io.File;
+
 import java.io.FileInputStream;
-import java.util.HashMap;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class YamlUtils {
+public class YamlUtil {
 
     public static TestDataModel loadData() throws Exception {
         //HashMap<String, Object> caseDatas = new HashMap<>();
         Yaml yaml = new Yaml();
-        TestDataModel me = yaml.loadAs(new FileInputStream(new File(System.getProperty("user.dir")+"/src/main/resources/post_temp3.yaml")), TestDataModel.class);
+        //TestDataModel me = yaml.loadAs(new FileInputStream(new File(System.getProperty("user.dir")+"/src/main/resources/post_temp3.yaml")), TestDataModel.class);
+        TestDataModel me = yaml.loadAs(new FileInputStream(System.getProperty("FILEPATH")), TestDataModel.class);
+
         //config 提取
         /*ConfigModel config = JSON.parseObject(JSON.toJSONString(me.getConfig()), ConfigModel.class);
         System.out.printf(JSON.toJSONString(me.getConfig()));
@@ -31,6 +29,11 @@ public class YamlUtils {
 
         return me;
     }
+
+    public static TestDataModel loadData(String casePath) throws FileNotFoundException {
+        return  new Yaml().loadAs(new FileInputStream(casePath), TestDataModel.class);
+    }
+
 
     private void printMap(Map map, int count){
         Set set = map.keySet();
@@ -65,8 +68,8 @@ public class YamlUtils {
 
 
     public static void main(String[] args) throws Exception {
-        //new YamlUtils().loadData();
-        new YamlUtils().loadData();
+        //new YamlUtil().loadData();
+        new YamlUtil().loadData();
 
     }
 }

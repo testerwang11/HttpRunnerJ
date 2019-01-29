@@ -1,5 +1,5 @@
 config:
-    name: "查询货源场景"
+    name: "企业查询货源场景"
     variables:
       user_agent: 'iOS/10.3'
       Content-Type: "application/x-www-form-urlencoded"
@@ -11,7 +11,7 @@ config:
 
 testSuit:
   - test:
-      name: "司机宝登录"
+      name: "司机宝企业登录"
       request:
         uri: /sjbAccount/router
         method: POST
@@ -54,6 +54,26 @@ testSuit:
           v: 1.0
       extract:
         - {"name": "Content-Type", "path": "header.Content-Type"}
+        - {"name": "stockCode", "path": "body.runningStocks[0].goodsInfo.stockcode"}
       validate:
         - {"check": "status_code", "comparator": "eq", "expect": 200}
-        - {"check": "runningStockCount", "comparator": "gt", "expect": 1110}
+        - {"check": "body.runningStockCount", "comparator": "gt", "expect": 100}
+  - test:
+      name: "企业查询货源详情"
+      request:
+        uri: /sjbStockOrder/router
+        method: POST
+        headers:
+          Content-Type: "application/x-www-form-urlencoded"
+        body:
+          stockcode: $.stockCode
+          session: $.sessionID
+          appcode: 100094
+          method: stock.query.detail
+          format: json
+          v: 2.0
+      extract:
+        - {"name": "Content-Type", "path": "header.Content-Type"}
+      validate:
+        - {"check": "status_code", "comparator": "eq", "expect": 200}
+        - {"check": "body.cmpnyInfo.companyCode", "comparator": "nnv", "expect": ""}

@@ -1,5 +1,5 @@
 config:
-    name: "create user testcases."
+    name: "查询货源场景4"
     variables:
       user_agent: 'iOS/10.3'
       Content-Type: "application/x-www-form-urlencoded"
@@ -8,7 +8,6 @@ config:
       headers:
         Content-Type: application/json
         User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36
-
 
 testSuit:
   - test:
@@ -57,4 +56,4 @@ testSuit:
         - {"name": "Content-Type", "path": "header.Content-Type"}
       validate:
         - {"check": "status_code", "comparator": "eq", "expect": 200}
-        - {"check": "runningStockCount", "comparator": "gt", "expect": 1110}
+        - {"check": "body.runningStockCount", "comparator": "gt", "expect": 110}

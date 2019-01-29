@@ -1,4 +1,4 @@
-package Tools;
+package com.utils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class HotLoad {
         HashMap hashMap = new HashMap();
         hashMap.put("parameter",parameterTypes);
         hashMap.put("value",value);
-        reflectMethod("Tools.FileUntils","sleep",hashMap);
+        reflectMethod("com.utils.FileUtil","sleep",hashMap);
     }
 
 

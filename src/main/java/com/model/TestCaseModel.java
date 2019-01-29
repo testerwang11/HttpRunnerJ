@@ -1,6 +1,5 @@
-package Model;
+package com.model;
 
-import com.model.DetailModel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -10,6 +9,8 @@ import lombok.ToString;
 @Setter
 @ToString
 public class TestCaseModel {
+
+    //private String name;
 
     private DetailModel test;
 

@@ -1,5 +1,5 @@
 config:
-    name: "查询货源场景"
+    name: "查询货源场景2"
     variables:
       user_agent: 'iOS/10.3'
       Content-Type: "application/x-www-form-urlencoded"
@@ -56,4 +56,4 @@ testSuit:
         - {"name": "Content-Type", "path": "header.Content-Type"}
       validate:
         - {"check": "status_code", "comparator": "eq", "expect": 200}
-        - {"check": "runningStockCount", "comparator": "gt", "expect": 1110}
+        - {"check": "body.runningStockCount", "comparator": "gt", "expect": 1110}
